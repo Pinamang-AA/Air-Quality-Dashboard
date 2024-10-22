@@ -46,23 +46,33 @@ ax.set_ylabel('Frequency', fontsize=12)
 st.pyplot(fig)
 
 # Time Series Analysis
-st.header('📈 Time Series Analysis (Smoothed)')
-data['Date'] = pd.to_datetime(data['Date'])  # Convert to datetime format
-data = data.sort_values('Date')  # Sort by date
+st.header('Time Series Analysis')
 
-# Compute rolling averages to smooth data
-data['PM2.5_MA'] = data['PM2.5'].rolling(window=30).mean()  # 30-day moving average
-data['PM10_MA'] = data['PM10'].rolling(window=30).mean()
+# Convert 'Date' column to datetime format
+data['Date'] = pd.to_datetime(data['Date'])
 
-# Plot smoothed time series
+# Sort data by date
+data = data.sort_values('Date')
+
+# Select only numeric columns for resampling
+numeric_columns = ['PM2.5', 'PM10']
+data_numeric = data[['Date'] + numeric_columns]
+
+# Resample the data to monthly averages
+monthly_data = data_numeric.set_index('Date').resample('M').mean()
+
+# Create the plot
 fig, ax = plt.subplots()
-ax.plot(data['Date'], data['PM2.5_MA'], label='PM2.5 (MA)', color='blue')
-ax.plot(data['Date'], data['PM10_MA'], label='PM10 (MA)', color='red')
-ax.set_title('Smoothed PM2.5 and PM10 Levels Over Time', fontsize=16)
-ax.set_xlabel('Date', fontsize=12)
-ax.set_ylabel('Concentration (µg/m³)', fontsize=12)
+ax.plot(monthly_data.index, monthly_data['PM2.5'], label='PM2.5')
+ax.plot(monthly_data.index, monthly_data['PM10'], label='PM10')
+
+# Set the title, labels, and legend
+ax.set_title('Monthly Average PM2.5 and PM10 Levels Over Time')
+ax.set_xlabel('Date')
+ax.set_ylabel('Levels')
 ax.legend()
-ax.grid(True)
+
+# Display the plot
 st.pyplot(fig)
 
 # Correlation Matrix
