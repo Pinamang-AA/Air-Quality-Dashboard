@@ -50,8 +50,12 @@ data['Date'] = pd.to_datetime(data['Date'])
 # Sort data by date
 data = data.sort_values('Date')
 
-# Resample the data to monthly averages (you can change this to 'W' for weekly, etc.)
-monthly_data = data.set_index('Date').resample('M').mean()
+# Select only numeric columns for resampling
+numeric_columns = ['PM2.5', 'PM10']
+data_numeric = data[['Date'] + numeric_columns]
+
+# Resample the data to monthly averages
+monthly_data = data_numeric.set_index('Date').resample('M').mean()
 
 # Create the plot
 fig, ax = plt.subplots()
@@ -66,6 +70,7 @@ ax.legend()
 
 # Display the plot
 st.pyplot(fig)
+
 
 # Correlation Matrix
 st.header('Correlation Matrix')
