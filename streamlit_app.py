@@ -12,7 +12,7 @@ def load_data(uploaded_file):
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
     else:
-        data = pd.read_csv("C:/Users/pc/Desktop/PROJECT/city_day_cleaned.csv")
+        data = pd.read_csv("city_day_cleaned.csv")
     return data
 
 st.title('Air Quality Dashboard')
