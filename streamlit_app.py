@@ -41,17 +41,30 @@ ax.set_xlabel('PM2.5')
 ax.set_ylabel('Frequency')
 st.pyplot(fig)
 
-# Resample data to monthly averages to reduce clutter
-data.set_index('Date', inplace=True)
-monthly_data = data.resample('M').mean()  # 'M' for monthly, 'D' for daily, etc.
+# Time Series Analysis
+st.header('Time Series Analysis')
 
+# Convert 'Date' column to datetime format
+data['Date'] = pd.to_datetime(data['Date'])
+
+# Sort data by date
+data = data.sort_values('Date')
+
+# Resample the data to monthly averages (you can change this to 'W' for weekly, etc.)
+monthly_data = data.set_index('Date').resample('M').mean()
+
+# Create the plot
 fig, ax = plt.subplots()
 ax.plot(monthly_data.index, monthly_data['PM2.5'], label='PM2.5')
 ax.plot(monthly_data.index, monthly_data['PM10'], label='PM10')
-ax.set_title('Monthly Average PM2.5 and PM10 Levels')
+
+# Set the title, labels, and legend
+ax.set_title('Monthly Average PM2.5 and PM10 Levels Over Time')
 ax.set_xlabel('Date')
 ax.set_ylabel('Levels')
 ax.legend()
+
+# Display the plot
 st.pyplot(fig)
 
 # Correlation Matrix
