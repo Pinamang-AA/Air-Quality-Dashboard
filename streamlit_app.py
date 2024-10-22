@@ -41,18 +41,18 @@ ax.set_xlabel('PM2.5')
 ax.set_ylabel('Frequency')
 st.pyplot(fig)
 
-# Apply a rolling average to smooth the data
-data['PM2.5_rolling'] = data['PM2.5'].rolling(window=30).mean()  # 30-day rolling average
-data['PM10_rolling'] = data['PM10'].rolling(window=30).mean()
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=data['Date'], y=data['PM2.5'], mode='lines', name='PM2.5'))
+fig.add_trace(go.Scatter(x=data['Date'], y=data['PM10'], mode='lines', name='PM10'))
 
-fig, ax = plt.subplots()
-ax.plot(data['Date'], data['PM2.5_rolling'], label='PM2.5 (Rolling Avg)')
-ax.plot(data['Date'], data['PM10_rolling'], label='PM10 (Rolling Avg)')
-ax.set_title('PM2.5 and PM10 Levels (Rolling Average)')
-ax.set_xlabel('Date')
-ax.set_ylabel('Levels')
-ax.legend()
-st.pyplot(fig)
+fig.update_layout(
+    title='PM2.5 and PM10 Levels Over Time',
+    xaxis_title='Date',
+    yaxis_title='Levels',
+    legend_title='Pollutants'
+)
+
+st.plotly_chart(fig)
 
 # Correlation Matrix
 st.header('Correlation Matrix')
