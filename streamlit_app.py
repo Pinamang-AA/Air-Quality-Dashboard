@@ -41,14 +41,14 @@ ax.set_xlabel('PM2.5')
 ax.set_ylabel('Frequency')
 st.pyplot(fig)
 
-# Time Series Analysis
-st.header('Time Series Analysis')
+# Apply a rolling average to smooth the data
+data['PM2.5_rolling'] = data['PM2.5'].rolling(window=30).mean()  # 30-day rolling average
+data['PM10_rolling'] = data['PM10'].rolling(window=30).mean()
+
 fig, ax = plt.subplots()
-data['Date'] = pd.to_datetime(data['Date'])
-data = data.sort_values('Date')
-ax.plot(data['Date'], data['PM2.5'], label='PM2.5')
-ax.plot(data['Date'], data['PM10'], label='PM10')
-ax.set_title('PM2.5 and PM10 Levels Over Time')
+ax.plot(data['Date'], data['PM2.5_rolling'], label='PM2.5 (Rolling Avg)')
+ax.plot(data['Date'], data['PM10_rolling'], label='PM10 (Rolling Avg)')
+ax.set_title('PM2.5 and PM10 Levels (Rolling Average)')
 ax.set_xlabel('Date')
 ax.set_ylabel('Levels')
 ax.legend()
