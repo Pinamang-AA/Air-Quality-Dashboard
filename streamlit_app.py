@@ -41,18 +41,18 @@ ax.set_xlabel('PM2.5')
 ax.set_ylabel('Frequency')
 st.pyplot(fig)
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=data['Date'], y=data['PM2.5'], mode='lines', name='PM2.5'))
-fig.add_trace(go.Scatter(x=data['Date'], y=data['PM10'], mode='lines', name='PM10'))
+# Resample data to monthly averages to reduce clutter
+data.set_index('Date', inplace=True)
+monthly_data = data.resample('M').mean()  # 'M' for monthly, 'D' for daily, etc.
 
-fig.update_layout(
-    title='PM2.5 and PM10 Levels Over Time',
-    xaxis_title='Date',
-    yaxis_title='Levels',
-    legend_title='Pollutants'
-)
-
-st.plotly_chart(fig)
+fig, ax = plt.subplots()
+ax.plot(monthly_data.index, monthly_data['PM2.5'], label='PM2.5')
+ax.plot(monthly_data.index, monthly_data['PM10'], label='PM10')
+ax.set_title('Monthly Average PM2.5 and PM10 Levels')
+ax.set_xlabel('Date')
+ax.set_ylabel('Levels')
+ax.legend()
+st.pyplot(fig)
 
 # Correlation Matrix
 st.header('Correlation Matrix')
