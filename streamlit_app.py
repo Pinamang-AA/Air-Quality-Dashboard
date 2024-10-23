@@ -32,6 +32,13 @@ Location = st.sidebar.multiselect('Select Location(s)', data['Location'].unique(
 if Location:
     data = data[data['Location'].isin(Location)]
 
+# Ensure the Date column is properly parsed
+try:
+    data['Date'] = pd.to_datetime(data['Date'], errors='coerce')  # Convert to datetime, coerce errors
+    data = data.dropna(subset=['Date'])  # Drop rows where 'Date' could not be parsed
+except Exception as e:
+    st.error(f"Error parsing date: {e}")
+
 # Dashboard layout: 3 sections in a grid
 st.markdown("## Dashboard Overview")
 
@@ -56,14 +63,18 @@ with col2:
 
 # Time Series Analysis: Monthly Trends (2nd row)
 st.markdown("## Monthly Trends")
-data['Date'] = pd.to_datetime(data['Date'])
-monthly_data = data.set_index('Date').resample('M').mean().reset_index()
 
-# Create a dual-line plot with Plotly for Monthly Trends
-fig = px.line(monthly_data, x='Date', y=['PM2.5', 'PM10'], title="Monthly Average PM2.5 and PM10 Levels",
-              labels={'value': 'Levels (µg/m³)', 'variable': 'Pollutant'}, color_discrete_sequence=['#1f77b4', '#ff7f0e'])
-fig.update_layout(xaxis_title='Date', yaxis_title='Pollutant Level')
-st.plotly_chart(fig, use_container_width=True)
+# Ensure only numeric columns are resampled
+numeric_columns = data.select_dtypes(include=np.number).columns
+
+if 'Date' in data.columns:
+    monthly_data = data.set_index('Date').resample('M')[numeric_columns].mean().reset_index()
+
+    # Create a dual-line plot with Plotly for Monthly Trends
+    fig = px.line(monthly_data, x='Date', y=['PM2.5', 'PM10'], title="Monthly Average PM2.5 and PM10 Levels",
+                  labels={'value': 'Levels (µg/m³)', 'variable': 'Pollutant'}, color_discrete_sequence=['#1f77b4', '#ff7f0e'])
+    fig.update_layout(xaxis_title='Date', yaxis_title='Pollutant Level')
+    st.plotly_chart(fig, use_container_width=True)
 
 # AQI Prediction Section: 3rd row
 st.markdown("## 🤖 Predict AQI Based on PM2.5 and PM10 Inputs")
