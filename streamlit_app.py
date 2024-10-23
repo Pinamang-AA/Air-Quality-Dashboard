@@ -65,31 +65,51 @@ with col2:
     ax.legend()
     st.pyplot(fig)
 
+    # AQI Prediction based on user input
     st.header('🌡️ AQI Meter')
+    
+    # Feature Inputs from user
     input_data = {}
     for feature in ['PM2.5', 'PM10']:
         input_data[feature] = st.number_input(f'Enter {feature}', value=float(data[feature].mean()))
-    input_df = pd.DataFrame(input_data, index=[0])
-    prediction = RandomForestRegressor().fit(input_df[['PM2.5', 'PM10']], data['AQI']).predict(input_df)[0]
     
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=prediction,
-        title={'text': "Predicted AQI"},
-        gauge={
-            'axis': {'range': [0, 500]},
-            'steps': [
-                {'range': [0, 50], 'color': "green"},
-                {'range': [51, 100], 'color': "yellow"},
-                {'range': [101, 150], 'color': "orange"},
-                {'range': [151, 200], 'color': "red"},
-                {'range': [201, 300], 'color': "purple"},
-                {'range': [301, 500], 'color': "maroon"},
-            ],
-            'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': prediction}
-        }
-    ))
-    st.plotly_chart(fig)
+    input_df = pd.DataFrame(input_data, index=[0])
+    
+    # Check for AQI column existence and handle missing values
+    if 'AQI' in data.columns and not data['AQI'].isnull().values.any():
+        # Prepare the data for model training
+        X = data[['PM2.5', 'PM10']]
+        y = data['AQI']
+
+        # Split data and train the model
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+
+        # Prediction based on user input
+        prediction = model.predict(input_df)[0]
+
+        # Display AQI Meter
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=prediction,
+            title={'text': "Predicted AQI"},
+            gauge={
+                'axis': {'range': [0, 500]},
+                'steps': [
+                    {'range': [0, 50], 'color': "green"},
+                    {'range': [51, 100], 'color': "yellow"},
+                    {'range': [101, 150], 'color': "orange"},
+                    {'range': [151, 200], 'color': "red"},
+                    {'range': [201, 300], 'color': "purple"},
+                    {'range': [301, 500], 'color': "maroon"},
+                ],
+                'threshold': {'line': {'color': "black", 'width': 4}, 'thickness': 0.75, 'value': prediction}
+            }
+        ))
+        st.plotly_chart(fig)
+    else:
+        st.warning('AQI data is missing or incomplete. Please upload data with AQI values.')
 
 # Next row: Correlation matrix and model evaluation
 col3, col4 = st.columns(2)
@@ -112,22 +132,21 @@ with col3:
 with col4:
     st.header('🤖 AQI Prediction Evaluation')
     
-    X = data[['PM2.5', 'PM10']]
-    y = data['AQI']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
-    r2 = r2_score(y_test, y_pred)
-    
-    st.write(f'**Mean Absolute Error (MAE):** {mae:.2f}')
-    st.write(f'**Mean Squared Error (MSE):** {mse:.2f}')
-    st.write(f'**Root Mean Squared Error (RMSE):** {rmse:.2f}')
-    st.write(f'**R-squared (R2):** {r2:.2f}')
+    if 'AQI' in data.columns and not data['AQI'].isnull().values.any():
+        # Model already trained, evaluate the performance
+        y_pred = model.predict(X_test)
+        
+        mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        rmse = np.sqrt(mse)
+        r2 = r2_score(y_test, y_pred)
+        
+        st.write(f'**Mean Absolute Error (MAE):** {mae:.2f}')
+        st.write(f'**Mean Squared Error (MSE):** {mse:.2f}')
+        st.write(f'**Root Mean Squared Error (RMSE):** {rmse:.2f}')
+        st.write(f'**R-squared (R2):** {r2:.2f}')
+    else:
+        st.warning('AQI data is missing or incomplete for model evaluation.')
 
 # AQI Range Information
 st.header('📘 AQI Ranges and Meanings')
