@@ -25,6 +25,9 @@ uploaded_file = st.sidebar.file_uploader("Upload your CSV file", type=["csv"])
 # Load data
 data = load_data(uploaded_file)
 
+# Convert 'Date' column to datetime if not already in datetime format
+data['Date'] = pd.to_datetime(data['Date'])
+
 # Sidebar filters
 st.sidebar.header('📍 Filters')
 st.sidebar.write("Select a location to analyze its air quality data.")
@@ -34,8 +37,14 @@ if Location:
 
 # Date range filter
 st.sidebar.write("Select Date Range")
-start_date = st.sidebar.date_input("Start date", data['Date'].min())
-end_date = st.sidebar.date_input("End date", data['Date'].max())
+start_date = st.sidebar.date_input("Start date", value=data['Date'].min().date())
+end_date = st.sidebar.date_input("End date", value=data['Date'].max().date())
+
+# Ensure the selected range is valid
+if start_date > end_date:
+    st.sidebar.error("Error: End date must fall after the start date.")
+
+# Filter the data based on the selected date range
 data = data[(data['Date'] >= pd.to_datetime(start_date)) & (data['Date'] <= pd.to_datetime(end_date))]
 
 # Display Raw Data
