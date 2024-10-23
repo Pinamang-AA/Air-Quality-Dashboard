@@ -54,7 +54,7 @@ st.write(data)
 # AQI Prediction based on user input
 st.header('📈 Predict AQI')
 input_data = {}
-pollutants = ['PM2.5', 'PM10', 'NO2', 'O3', 'SO2', 'CO']
+pollutants = ['PM2.5', 'PM10']
 
 for pollutant in pollutants:
     input_data[pollutant] = st.number_input(f'Enter {pollutant}', value=float(data[pollutant].mean()))
