@@ -17,7 +17,7 @@ def load_data(uploaded_file):
 
 # Set title and page layout
 st.set_page_config(page_title="Air Quality Dashboard", layout="wide")
-st.title('📊 Modern Air Quality Dashboard')
+st.title('📊 SMAP Air Quality Dashboard')
 
 # Sidebar for file upload and filters
 st.sidebar.header("📂 Data Upload & Filters")
